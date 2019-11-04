@@ -18,6 +18,7 @@ object Main extends App {
     logger.info("RGB matrix created")
     val brightnessMatrix = convertToBrightnessMatrix(pixelMatrix)
     logger.info("Brightness matrix created")
+    val asciiMatrix = convertBrightnessToAscii(brightnessMatrix)
   }
 
   def loadPixelsToMatrix(image: Image): Array[Array[(Int, Int, Int)]] = {
@@ -37,5 +38,13 @@ object Main extends App {
     for {
       arr <- matrix
     } yield arr map (tuple => (tuple._1 + tuple._2 + tuple._3) / 3)
+  }
+
+  def convertBrightnessToAscii(matrix: Array[Array[Int]]): Array[Array[Char]] = {
+    val chars = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+    val toCharNum = (num: Int) => { (num * chars.size) / 255 }
+    for {
+      arr <- matrix
+    } yield arr map (num => chars charAt toCharNum(num))
   }
 }
