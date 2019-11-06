@@ -9,8 +9,8 @@ object Main extends App {
 
   override def main(args: Array[String]): Unit = {
 
-    val imagePath = "/toad.jpg"
-    val image = Image.fromResource(imagePath).resize(0.5)
+    val imagePath = "/mario.png"
+    val image = Image.fromResource(imagePath)
     logger.info("Successfully loaded image")
     logger.info(s"Image size: ${image.width} x ${image.height}")
 
@@ -19,15 +19,16 @@ object Main extends App {
     val brightnessMatrix = convertToBrightnessMatrix(pixelMatrix)
     logger.info("Brightness matrix created")
     val asciiMatrix = convertBrightnessToAscii(brightnessMatrix)
-    printAsciiMatrix(asciiMatrix)
+    printAsciiMatrix(asciiMatrix, image.width, image.height)
   }
 
   def loadPixelsToMatrix(image: Image): Array[Array[(Int, Int, Int)]] = {
     val width = image.width
     val height = image.height
     val matrix = Array.ofDim[(Int, Int, Int)](width, height)
-    for (i <- 0 to height - 1) {
-      for (j <- (width - 1) to 0 by -1) {
+    for (i <- 0 to width - 1) {
+      for (j <- 0 to height - 1) {
+        logger.info(s"i: $i j: $j")
         val pixel = image.pixel(i, j)
         matrix(i)(j) = (pixel.red, pixel.green, pixel.blue)
       }
@@ -36,9 +37,7 @@ object Main extends App {
   }
 
   def convertToBrightnessMatrix(matrix: Array[Array[(Int, Int, Int)]]): Array[Array[Int]] = {
-    for {
-      arr <- matrix
-    } yield arr map (tuple => (tuple._1 + tuple._2 + tuple._3) / 3)
+    matrix map { row => row map (tuple => (tuple._1 + tuple._2 + tuple._3) / 3) }
   }
 
   def convertBrightnessToAscii(matrix: Array[Array[Int]]): Array[Array[Char]] = {
@@ -47,15 +46,13 @@ object Main extends App {
     val toCharNum = (num: Int) => {
       (num * (chars.size - 1)) / 255
     }
-    for {
-      arr <- matrix
-    } yield arr map (num => chars charAt toCharNum(num))
+    matrix map { row => row map (num => chars charAt toCharNum(num)) }
   }
 
-  def printAsciiMatrix(matrix: Array[Array[Char]]): Unit = {
-    for (i <- 0 to matrix.size - 1) {
-      for (j <- 0 to matrix(i).size - 1) {
-        print(matrix(i)(j))
+  def printAsciiMatrix(matrix: Array[Array[Char]], width: Int, height: Int): Unit = {
+    for (i <- 0 to height -1) {
+      for (j <- 0 to width - 1) {
+        print(s"${matrix(j)(i)}${matrix(j)(i)}${matrix(j)(i)}")
       }
       println
     }
