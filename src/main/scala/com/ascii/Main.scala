@@ -1,5 +1,7 @@
 package com.ascii
 
+import java.nio.file.Paths
+
 import com.sksamuel.scrimage.Image
 import org.slf4j.LoggerFactory
 
@@ -7,10 +9,11 @@ object Main extends App {
 
   lazy val logger = LoggerFactory.getLogger(getClass)
 
+  lazy val DefaultImage = "/toad.jpg"
+
   override def main(args: Array[String]): Unit = {
 
-    val imagePath = "/mario.png"
-    val image = Image.fromResource(imagePath)
+    val image = getImage(args)
     logger.info("Successfully loaded image")
     logger.info(s"Image size: ${image.width} x ${image.height}")
 
@@ -22,13 +25,17 @@ object Main extends App {
     printAsciiMatrix(asciiMatrix, image.width, image.height)
   }
 
+  def getImage(args: Array[String]): Image = args match {
+    case Array(path, _*) => Image.fromPath(Paths.get(path))
+    case _ => Image.fromResource(DefaultImage)
+  }
+
   def loadPixelsToMatrix(image: Image): Array[Array[(Int, Int, Int)]] = {
     val width = image.width
     val height = image.height
     val matrix = Array.ofDim[(Int, Int, Int)](width, height)
     for (i <- 0 to width - 1) {
       for (j <- 0 to height - 1) {
-        logger.info(s"i: $i j: $j")
         val pixel = image.pixel(i, j)
         matrix(i)(j) = (pixel.red, pixel.green, pixel.blue)
       }
@@ -42,7 +49,6 @@ object Main extends App {
 
   def convertBrightnessToAscii(matrix: Array[Array[Int]]): Array[Array[Char]] = {
     val chars = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
-    logger.info(s"Number of chars: ${chars.size}")
     val toCharNum = (num: Int) => {
       (num * (chars.size - 1)) / 255
     }
@@ -50,7 +56,7 @@ object Main extends App {
   }
 
   def printAsciiMatrix(matrix: Array[Array[Char]], width: Int, height: Int): Unit = {
-    for (i <- 0 to height -1) {
+    for (i <- 0 to height - 1) {
       for (j <- 0 to width - 1) {
         print(s"${matrix(j)(i)}${matrix(j)(i)}${matrix(j)(i)}")
       }
